@@ -6,118 +6,156 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-    body {
-        margin: 0;
-        height: 100vh;
-        background: linear-gradient(135deg, #ff4d6d, #ff758f);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: 'Arial', sans-serif;
-        overflow: hidden;
-    }
+body {
+    margin: 0;
+    height: 100vh;
+    background: linear-gradient(135deg, #ff4d6d, #ff758f);
+    font-family: Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
 
-    .card {
-        background: white;
-        padding: 30px;
-        border-radius: 20px;
-        width: 90%;
-        max-width: 400px;
-        text-align: center;
-        box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-        animation: pop 1s ease;
-    }
+.card {
+    background: #fff;
+    width: 90%;
+    max-width: 400px;
+    padding: 25px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+}
 
-    h1 {
-        color: #ff4d6d;
-        margin-bottom: 10px;
-    }
+h1 {
+    color: #ff4d6d;
+}
 
-    p {
-        color: #444;
-        font-size: 16px;
-        line-height: 1.6;
-    }
+#typing {
+    font-size: 16px;
+    color: #444;
+    min-height: 80px;
+}
 
-    .heart {
-        font-size: 50px;
-        animation: beat 1s infinite;
-    }
+.heart {
+    font-size: 50px;
+    animation: beat 1s infinite;
+}
 
-    button {
-        margin-top: 20px;
-        padding: 12px 25px;
-        border: none;
-        background: #ff4d6d;
-        color: white;
-        font-size: 16px;
-        border-radius: 30px;
-        cursor: pointer;
-        transition: 0.3s;
-    }
+button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 30px;
+    background: #ff4d6d;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 15px;
+}
 
-    button:hover {
-        background: #e63946;
-    }
+button:hover {
+    background: #e63946;
+}
 
-    @keyframes beat {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.2); }
-    }
+.hidden {
+    display: none;
+}
 
-    @keyframes pop {
-        from { transform: scale(0.5); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
-    }
+@keyframes beat {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+/* floating hearts */
+.heart-float {
+    position: absolute;
+    font-size: 20px;
+    animation: floatUp 4s linear infinite;
+    opacity: 0.7;
+}
+
+@keyframes floatUp {
+    from { transform: translateY(100vh); }
+    to { transform: translateY(-10vh); }
+}
 </style>
 </head>
 
 <body>
 
-<div class="card">
+<div class="card" id="startScreen">
     <div class="heart">❤️</div>
-    <h1>Hey My Love</h1>
-
-    <p>
-        I know this is unexpected…  
-        but I wanted to do something special.
-    </p>
-
-    <p>
-        Every day with you is my favorite chapter 💕  
-        And today I just want to ask you one thing…
-    </p>
-
-    <h2 style="color:#ff4d6d;">Will you be my Valentine? 🌹</h2>
-
-    <button onclick="yesClicked()">YES 💖</button>
+    <h1>Hello 😌</h1>
+    <p>This page is made only for you</p>
+    <button onclick="startSurprise()">Tap to Open 💌</button>
 </div>
 
+<div class="card hidden" id="mainCard">
+    <h1 id="nameTitle"></h1>
+    <p id="typing"></p>
+
+    <h2 id="countdown"></h2>
+
+    <button onclick="sayYes()">YES 💖</button>
+</div>
+
+<audio id="music" loop>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+</audio>
+
 <script>
-function yesClicked() {
-    document.body.innerHTML = `
-        <div style="
-            height:100vh;
-            display:flex;
-            flex-direction:column;
-            justify-content:center;
-            align-items:center;
-            background:linear-gradient(135deg,#ff4d6d,#ff758f);
-            color:white;
-            font-family:Arial;
-            text-align:center;
-            padding:20px;
-        ">
-            <h1>I KNEW IT 😍</h1>
-            <p style="font-size:20px;">
-                Happy Valentine’s Day ❤️  
-                You just made my heart skip a beat!
-            </p>
-            <p style="margin-top:30px;">
-                — Yours always 💌
-            </p>
-        </div>
-    `;
+let text = "I wanted to do something different… something special. Every day with you feels like my favorite notification ❤️ Will you be my Valentine? 🌹";
+let index = 0;
+
+function startSurprise() {
+    let name = prompt("Enter your name 💕");
+    if (!name) name = "My Love";
+
+    document.getElementById("nameTitle").innerText = "Hey " + name + " ❤️";
+    document.getElementById("startScreen").classList.add("hidden");
+    document.getElementById("mainCard").classList.remove("hidden");
+
+    document.getElementById("music").play();
+    typeText();
+    startCountdown();
+    floatingHearts();
+}
+
+function typeText() {
+    if (index < text.length) {
+        document.getElementById("typing").innerHTML += text.charAt(index);
+        index++;
+        setTimeout(typeText, 40);
+    }
+}
+
+function startCountdown() {
+    let count = 5;
+    let el = document.getElementById("countdown");
+    let timer = setInterval(() => {
+        el.innerText = "Opening surprise in " + count + "...";
+        count--;
+        if (count < 0) {
+            clearInterval(timer);
+            el.innerText = "💘 Surprise unlocked 💘";
+        }
+    }, 1000);
+}
+
+function sayYes() {
+    window.location.href = "https://wa.me/?text=I%20said%20YES%20❤️%20Happy%20Valentine’s%20Day";
+}
+
+function floatingHearts() {
+    setInterval(() => {
+        let heart = document.createElement("div");
+        heart.className = "heart-float";
+        heart.innerHTML = "❤️";
+        heart.style.left = Math.random() * 100 + "vw";
+        document.body.appendChild(heart);
+
+        setTimeout(() => heart.remove(), 4000);
+    }, 500);
 }
 </script>
 
